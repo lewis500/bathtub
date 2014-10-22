@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- ============== CSS ===================== -->
+  <title>Simulation</title>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+  <!-- endbower -->
+
+  <!-- include: "type": "css", "files": "styles/**/*.css" -->
+  <link rel="stylesheet" type="text/css" href="styles/main.css" />
+  <!-- /include -->
+
+</head>
+<!-- ============== BODY =================== -->
+
+<body ng-app="mainApp">
+  <div ng-controller="mainCtrl as main" >
+    <button class="btn" ng-class="{'btn-success': main.ticker.paused, 'btn-warning': !main.ticker.paused }" ng-click="main.ticker.pause()">{{main.ticker.paused ? "Play" : "Pause"}}</button>
+    <div class="col-md-8" line-chart minutes="main.minutes" height="280"></div>
+    <div class="col-md-8" bar-chart measure="main.measure" cars="main.cars" tip-url="tooltip.html" width="500" height="250"></div>
+  </div>
+</body>
+
+<!-- bower:js -->
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/d3/d3.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/lodash/dist/lodash.compat.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="bower_components/jquery-ui/jquery-ui.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<!-- endbower -->
+
+<!-- ============== LIBRARIES =================== -->
+<!-- <script src="libraries/buttons.js"></script> -->
+<!-- <script type="text/javascript" src="libraries/ui-bootstrap-custom-tpls-0.10.0.js"></script> -->
+
+<!-- ============== SCRIPTS ====r=============== -->
+<script type="text/javascript">
+var app = angular.module('mainApp', ['ui.bootstrap']);
+</script>
+
+<!-- include: "type": "js", "files": "js/**/*.js" -->
+<!-- <script src="js/DataService.js"></script> -->
+<!-- <script src="js/MFD.js"></script> -->
+<script src="js/Runner.js"></script>
+<script src="js/bar.js"></script>
+<script src="js/car.js"></script>
+<script src="js/controller.js"></script>
+<!-- <script src="js/distance.js"></script> -->
+<script src="js/lineChart.js"></script>
+<script src="js/minute.js"></script>
+<!-- <script src="js/tollChart.js"></script> -->
+<!-- <script src="js/velChart.js"></script> -->
+<!-- /include -->
+
+</html>

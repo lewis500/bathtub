@@ -1,0 +1,49 @@
+body {
+    font-family:'Arial', sans-serif;
+    padding-bottom: 150px;
+    padding-top: 5px;
+    font-size: 15px;
+}
+.bar {
+    fill: steelblue;
+}
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+.container {
+    margin-left: 5px;
+}
+.line {
+    fill: none;
+    stroke-width: 2px;
+      /*shape-rendering: crispEdges;*/
+
+}
+.scatterDot circle {
+    stroke: none;
+    fill:'crimson';
+}
+/*.barChart.x.axis text {
+    fill: none;
+}*/
+.tip {
+    color: white;
+    background-color: #222;
+    pointer-events: none;
+    padding: 8px;
+    /*position: absolute;*/
+    font-size: 13px;
+    border: 0px;
+    border-radius: 2px;
+    z-index: 1000;
+    /*width: 100px;*/
+}
+.tip table {
+    margin-bottom: 0px;
+}
+
+.lineLabel{
+    font-size: 14px;
+}
