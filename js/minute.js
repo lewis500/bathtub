@@ -6,7 +6,7 @@
       Minute.serve = function() {
         var Q = this.queue;
         var self = this;
-        this.vel = findVel(Q.length * Uni.rescale);
+        this.vel = findVel(Q.length);
         var numE = 0;
         _.forEach(Q, function(car) {
           car.kmLeft = car.kmLeft - self.vel;

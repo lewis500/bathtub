@@ -28,7 +28,7 @@
           .ticks(0)
           .tickFormat(function(d) {
             return null;
-          })
+          });
 
         var yAxis = d3.svg.axis()
           .scale(y)

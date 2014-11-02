@@ -5,9 +5,8 @@
       alpha: 1,
       beta: .5,
       gamma: 2,
-      numCars: 5000,
-      numMinutes: 150,
-      rescale: 13,
+      numCars: 2000,
+      numMinutes: 75,
       z: .5 * 2 / (2.5)
     });
 
@@ -48,7 +47,11 @@
             newCar.init(n, km, w, 100, aT);
             return newCar;
           });
-        cars = self.cars;
+
+        self.sample = d3.range(200).map(function(d){
+          return self.cars[d*Uni.numCars / 200];
+        });
+
         self.minutes = d3.range(0, Uni.numMinutes)
           .map(function(t) {
             var newMinute = Object.create(Minute);
@@ -66,12 +69,10 @@
       self.init();
 
       function tick() {
-        // _.invoke(self.minutes, 'evalCum');
         _.invoke(self.minutes, 'serve');
         var scale = d3.scale.linear()
           .domain(_.pluck(self.minutes, 'X'))
           .range(_.pluck(self.minutes, 't'));
-        // var X = _.clone(blankX);
         _.forEach(X, function(val, key) {
           var val = rounder(scale(+key));
           X[key] = val;
@@ -104,13 +105,6 @@ function mi(a, b) {
   return d3.min([a, b]);
 }
 
-function q(k) {
-  var u = mi(k, 14000);
-  u1 = ma(0, k - 14000);
-  var g = 2.28e-8 * Math.pow(u, 3) - 8.62e-4 * Math.pow(u, 2) + 9.58 * u - u1 * 1.4;
-  return (ma(g, 0) * 2.3);
-}
-
 function linspace(a, b, precision) {
   var c = 1.0 / precision;
   a = a * c;
@@ -135,15 +129,7 @@ function mi(a, b) {
   return d3.min([a, b]);
 }
 
-function q(k) {
-  var u = mi(k, 14000);
-  u1 = ma(0, k - 14000);
-  var g = 2.28e-8 * Math.pow(u, 3) - 8.62e-4 * Math.pow(u, 2) + 9.58 * u - u1 * 1.4;
-  return (ma(g, 0) * 2.3);
+
+function findVel(u){
+  return .5*(1 - 0.6*u/2000);
 }
-
-
-function findVel(u) {
-  u = ma(u, .01);
-  return q(u) / u * 1.0 / 60;
-};
