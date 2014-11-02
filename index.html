@@ -21,7 +21,7 @@
 <body ng-app="mainApp">
   <div ng-controller="mainCtrl as main" >
     <button class="btn" ng-class="{'btn-success': main.ticker.paused, 'btn-warning': !main.ticker.paused }" ng-click="main.ticker.pause()">{{main.ticker.paused ? "Play" : "Pause"}}</button>
-    <div class='col-md-8' gantt-chart cars='main.sample' height='300'></div>
+    <div class='col-md-8' gantt-chart cars='main.cars' height='500'></div>
     <!-- <div class="col-md-8" line-chart minutes="main.minutes" height="280"></div> -->
     <!-- <div class="col-md-8" bar-chart measure="main.measure" cars="main.cars" tip-url="tooltip.html" width="500" height="250"></div> -->
   </div>

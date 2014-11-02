@@ -2,12 +2,8 @@
 
   angular.module('mainApp')
     .constant('Uni', {
-      alpha: 1,
-      beta: .5,
-      gamma: 2,
-      numCars: 2000,
-      numMinutes: 75,
-      z: .5 * 2 / (2.5)
+      numCars: 250,
+      numMinutes: 80,
     });
 
   angular.module('mainApp')
@@ -19,8 +15,6 @@
       }
 
       self.increment = .01;
-
-      self.measure = 'total';
 
       function makeX() {
         var res = {};
@@ -34,22 +28,30 @@
 
       var X = makeX();
 
+      var samples = d3.range(0,20)
+        .map(function(d){
+          return [];
+        });
+
+      var which = 0;
+
       self.init = function() {
         var n = 0;
         var w = 0;
-        self.cars = linspace2(1.3, 3.3, Uni.numCars)
+        self.cars = linspace2(.5, 6, Uni.numCars)
           .map(function(d) {
             var km = rounder(d);
             var newCar = Object.create(Car);
             var aT = _.random(0, Uni.numMinutes - 1);
             n++;
             w += km;
-            newCar.init(n, km, w, 100, aT);
+            newCar.init(n, km, aT);
+            _.sample(samples,1)[0].push(newCar);
             return newCar;
           });
 
-        self.sample = d3.range(200).map(function(d){
-          return self.cars[d*Uni.numCars / 200];
+        self.sample = d3.range(250).map(function(d){
+          return self.cars[d*Uni.numCars / 250];
         });
 
         self.minutes = d3.range(0, Uni.numMinutes)
@@ -65,7 +67,7 @@
       };
 
 
-      self.sampleSize = 20;
+      self.sampleSize = 5;
       self.init();
 
       function tick() {
@@ -77,8 +79,10 @@
           var val = rounder(scale(+key));
           X[key] = val;
         });
-
-        var s = _.sample(self.cars, self.sampleSize);
+        var s = samples[which];
+        which = (which + 1)%samples.length;
+        // var s = _.sample(samples,1)[0];
+        // var s = _.sample(self.cars, self.sampleSize);
         _.forEach(s, function(d) {
           d.choose(X);
         });
@@ -90,7 +94,7 @@
       };
 
       var runner = Runner;
-      self.ticker = runner.addRepeater('tick', tick, 100, 'pace');
+      self.ticker = runner.addRepeater('tick', tick, 50, 'pace');
       self.ticker.start();
       // self.paused = self.runner.repeaters.tick.paused;
     });
@@ -131,5 +135,9 @@ function mi(a, b) {
 
 
 function findVel(u){
-  return .5*(1 - 0.6*u/2000);
+  return .13*(1.0 - 0.4*(ma(u/250, .2)));
+}
+
+function e(v){
+  return Math.exp(v);
 }
