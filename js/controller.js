@@ -3,7 +3,7 @@
   angular.module('mainApp')
     .constant('Uni', {
       numCars: 250,
-      numMinutes: 80,
+      numMinutes: 100,
     });
 
   angular.module('mainApp')
@@ -38,14 +38,17 @@
       self.init = function() {
         var n = 0;
         var w = 0;
+        // var times = d3.range(10)
         self.cars = linspace2(.5, 6, Uni.numCars)
           .map(function(d) {
             var km = rounder(d);
             var newCar = Object.create(Car);
+            // var wT = _.random(0,3) * Math.floor(Math.random()*Uni.numMinutes * .1) + Math.floor(Uni.numMinutes * .4);
+            var wT = 45;
             var aT = _.random(0, Uni.numMinutes - 1);
             n++;
             w += km;
-            newCar.init(n, km, aT);
+            newCar.init(n, km, aT,wT);
             _.sample(samples,1)[0].push(newCar);
             return newCar;
           });
@@ -135,7 +138,7 @@ function mi(a, b) {
 
 
 function findVel(u){
-  return .13*(1.0 - 0.4*(ma(u/250, .2)));
+  return .13*(1.0 - 0.2*(ma(u/250, .2)));
 }
 
 function e(v){

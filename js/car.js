@@ -2,7 +2,7 @@
   angular.module('mainApp')
     .factory('Car', function(Uni) {
       var Car = {
-        init: function(n, km, aT) {
+        init: function(n, km, aT, wT) {
           _.assign(this, {
             n: n,
             km: km,
@@ -10,7 +10,8 @@
             eT: null,
             poss: 0,
             kmLeft: km,
-            utility: 0
+            utility: 0,
+            wT: wT
           });
         },
         choose: function(X) {
@@ -31,7 +32,7 @@
           this.aT = this.poss;
         },
         getUtility: function(aT, eT) {
-          var a = Uni.numMinutes/2;
+          var a = this.wT;
           var b = 2;
           var c = Uni.numMinutes;
           var timeAtHome = -e(b * -(aT-a)/c) / b;
