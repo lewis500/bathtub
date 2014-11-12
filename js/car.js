@@ -1,6 +1,19 @@
 (function() {
   angular.module('mainApp')
     .factory('Car', function(Uni) {
+
+      var getToll = {
+        distance: function(SP) {
+          return this.phi - SP;
+        },
+        trip: function(SP) {
+          return this.phiMax - SP;
+        },
+        none: function(eT) {
+          return 0;
+        }
+      };
+
       var Car = {
         init: function(n, km, aT, wT) {
           _.assign(this, {
@@ -14,6 +27,10 @@
             wT: wT
           });
         },
+        setToll: function(v) {
+          this.toll = v;
+        },
+        toll: 'none',
         choose: function(X) {
           var self = this;
           var pUtil = this.utility;
@@ -31,13 +48,12 @@
         makeChoice: function() {
           this.aT = this.poss;
         },
+        SP: function(eT) {
+
+        },
         getUtility: function(aT, eT) {
-          var a = this.wT;
-          var b = 2;
-          var c = Uni.numMinutes;
-          var timeAtHome = -e(b * -(aT-a)/c) / b;
-          var timeAtWork = -e(b * (eT-a)/c) / b;
-          return timeAtWork + timeAtHome;
+          var SP = max(-Uni.beta * (eT - Uni.wT), Uni.gamma * (eT - Uni.wT));
+          return SP + Uni.alpha * (eT - aT) + getToll[this.toll].call(this, SP);
         },
         setUtility: function() {
           this.utility = this.getUtility(this.aT, this.eT);
@@ -46,6 +62,16 @@
           var M = minutes[this.aT];
           M.receive(this);
           M.arrivals++;
+        },
+        setToll: function(val) {
+          if (val === "vickrey") {
+            getToll =
+          } else {
+            getToll = function() {
+              return 0;
+            };
+          }
+
         }
       };
       return Car;

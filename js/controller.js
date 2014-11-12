@@ -38,7 +38,6 @@
       self.init = function() {
         var n = 0;
         var w = 0;
-        // var times = d3.range(10)
         self.cars = linspace2(.5, 6, Uni.numCars)
           .map(function(d) {
             var km = rounder(d);
