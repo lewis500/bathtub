@@ -1,103 +1,97 @@
-app.directive('tollChart', ['$Uni',
-    function($Uni) {
+(function(angular) {
 
-        return function(scope, el, attr) {
-            var tip = d3.select(".tip");
+  angular.module('mainApp').directive('tollChart',
+    function(Uni) {
 
-            var margin = {
-                top: 20,
-                right: 35,
-                bottom: 30,
-                left: 35
-            };
+      var link = function(scope, el, attr, ctrl) {
 
-            var height = 250;
-            var y = d3.scale.linear().range([height, 0]).domain([0, $Uni.phiVickrey]);
-            var x = d3.scale.linear().domain([0, $Uni.patches.length]);
-            var color = d3.scale.category10();
-            var xAxis = d3.svg.axis()
-                .scale(x)
-                .orient("bottom")
-                .ticks(10);
+        var margin = {
+          top: 10,
+          right: 35,
+          bottom: 30,
+          left: 45
+        };
 
-            var yAxis = d3.svg.axis()
-                .scale(y)
-                .orient("left");
+        var width = (+attr.width) - margin.left - margin.right;
+        var height = (+attr.height) - margin.top - margin.bottom;
+        var numFormat = d3.format(".2r");
 
-            var line = d3.svg.line()
-                .x(function(d) {
-                    return x(d.time);
-                })
-                .y(function(d) {
-                    return y(d.toll);
-                });
+        var y = d3.scale.linear()
+          .domain([0, 50])
+          .range([height, 0]);
+
+        var x = d3.scale.linear()
+          .domain([0, Uni.numMinutes])
+          .range([0, width]);
+
+        var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+        var svg = d3.select(el[0]).append("svg")
+          .attr("width", +width + margin.left + margin.right)
+          .attr("height", +height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var line = d3.svg.line()
+          .x(function(d) {
+            return x(d.t);
+          })
+          .y(function(d) {
+            return y(d.toll);
+          });
+
+        var path = svg.append('path')
+          .attr({
+            'stroke-width': 3,
+            'stroke': 'red',
+            fill: 'none'
+          })
+
+        var gXAxis = svg.append("g")
+          .attr("class", " x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+        var gYAxis = svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
 
 
-            var svg = d3.select(el[0])
-                .append("svg")
-                .style('width', "100%")
-                .style("height", height + margin.top + margin.bottom);
+        scope.$watch('car', draw);
 
-            var g = svg.append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        function draw() {
+          var c = scope.car;
+          if (!c) return;
+          console.log('hello')
+          var data = d3.range(Uni.numMinutes)
+            .map(function(d) {
+              var SP = Uni.wT - d;
+              return {
+                t: d,
+                toll: c.getToll[c.tollType](SP, c.phi)
+              };
+            });
 
-            var bg = svg.append("rect")
-                .attr({
-                    height: height,
-                    opacity: 0.1
-                })
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+          path.datum(data);
 
-            var gXAxis = g.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
+          path.attr('d', line);
+        }
 
-            var gYAxis = g.append("g")
-                .attr("class", "y axis")
-                .call(yAxis)
-                .append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")
-                .style("text-anchor", "end")
-                .text("numulative miles arrived");
+      }; //end link
 
-            var myLine = g.append("path")
-                .attr("class", "line")
-                .attr("stroke-width", "2px")
-                .attr("stroke", "crimson");
+      return {
+        link: link,
+        scope: {
+          car: '=car',
+        },
+        restrict: 'A',
+      };
+    }); //end directive definition
 
-            var drawn;
-
-            scope.$on('tollEvent', update);
-
-            $(window).on('resize', render);
-
-            render();
-
-            function render() {
-                var width = d3.select(el[0]).node().offsetWidth - margin.left - margin.right;
-                x.range([0, width]);
-                gXAxis.call(xAxis);
-                bg.attr("width", width);
-                if (drawn) update();
-            }
-
-            function update() {
-                drawn = true;
-                var data = _.range(1, $Uni.patches.length + 1).map(function(d) {
-                    return {
-                        time: d,
-                        toll: scope.tolledGuy.evalToll(d)
-                    };
-                });
-                myLine.datum(data)
-                    .transition()
-                    .ease('linear')
-                    .attr("d", line);
-            }
-
-        }; //end the big return
-
-    }
-]); //end directive definition
+})(window.angular);

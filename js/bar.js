@@ -57,60 +57,57 @@
 
         scope.$on('drawEvent', draw);
 
-        var everyfive = _.range(0, 50).map(function(d) {
-          return d * 25;
-        });
-
         function draw() {
-          var data = everyfive
-            .map(function(d) {
-              return scope.cars[d];
-            });
+          var data = scope.cars;
 
           var measure = scope.measure;
           if (!data) return;
           if (x.domain().length == 0) {
             x.domain(data.map(function(d) {
-              return d.w;
+              return d.phi;
             }));
             gXAxis.call(xAxis);
           }
 
           var b = d3.extent(data, function(d) {
-            return d.cost[measure]
+            return d[measure]
           });
 
-          y.domain([d3.min([b[0], 0]), d3.max([b[1], 0])])
+          y.domain(b);
 
-          gYAxis.transition().duration(200).ease('cubic')
+          gYAxis
             .call(yAxis);
 
           var bar = svg.selectAll(".bar")
-            .data(data);
+            .data(data, function(d) {
+              return d.n;
+            });
 
           bar.enter()
             .append("rect")
             .attr("class", "bar");
 
           bar.on({
-            'mouseover': mouseoverFunc,
+            // mouseover: mouseoverFunc,
+            click: scope.changeCar
           });
 
-          bar.transition()
-            .duration(150)
-            .ease('cubic')
-            .delay(function(d, i) {
-              return 1 * i;
-            })
+          bar
+          // .transition()
+          // .duration(150)
+          // .ease('linear')
+          // .delay(function(d, i) {
+          //   return 1 * i;
+          // })
             .attr("x", function(d) {
-              return x(d.w);
+              return x(d.phi);
             })
             .attr("width", x.rangeBand())
             .attr("y", function(d) {
-              return y(d.cost[measure]);
+              return y(d[measure]);
             })
             .attr("height", function(d) {
-              return height - y(d.cost[measure]);
+              return height - y(d[measure]);
             });
         }
 
@@ -121,19 +118,20 @@
         scope: {
           cars: '=cars',
           measure: '=measure',
+          changeCar: "=changeCar"
         },
-        templateUrl: function(el, attr) {
-          return attr.tipUrl;
-        },
+        // templateUrl: function(el, attr) {
+        //   return attr.tipUrl;
+        // },
         restrict: 'A',
-        controller: function($scope) {
-          $scope.info = {
-            travel_cost: 0,
-            schedule_cost: 0,
-            toll: 0,
-            total: 0
-          };
-        }
+        // controller: function($scope) {
+        //   $scope.info = {
+        //     travel_cost: 0,
+        //     schedule_cost: 0,
+        //     toll: 0,
+        //     total: 0
+        //   };
+        // }
       };
     }); //end directive definition
 

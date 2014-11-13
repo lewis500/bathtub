@@ -14,7 +14,7 @@
             numE++;
             car.eT = self.t;
             car.kmLeft = car.km;
-            car.setUtility();
+            car.evalCost();
           } else self.next.receive(car);
         });
         this.cumE = numE;

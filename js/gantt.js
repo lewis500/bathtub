@@ -14,9 +14,9 @@
         var color = d3.scale.category20();
 
         var colorScale = d3.scale.linear() //function that takes numbers & returns colors
-            .domain([0,200]) //domain of input data 1 to 38
-            .range(["blue", "yellow"]) //the color range
-            .interpolate(d3.interpolateHcl); //how to fill the inbetween colors
+          .domain([0, 200]) //domain of input data 1 to 38
+          .range(["blue", "yellow"]) //the color range
+          .interpolate(d3.interpolateHcl); //how to fill the inbetween colors
 
         var height = +attr.height;
         var y = d3.scale.ordinal().rangeBands([0, height], .1)
@@ -27,19 +27,21 @@
 
         var tip = d3.select(".tip");
 
-
         var svg = d3.select(el[0])
           .append("svg")
           .style('width', "100%")
-          .attr("height", height + margin.top + margin.bottom);
-
-        var g = svg.append("g")
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        var bg = g.append('rect')
-          .attr('height', height)
-          .attr('fill','#222')
 
-        var gXAxis = g.append("g")
+
+        var bg = svg.append('rect')
+          .attr('height', height)
+          .attr('fill', '#222');
+          
+        var rg = svg.append('g').attr('class', 'g-bar');
+
+        var gXAxis = svg.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")");
 
@@ -64,8 +66,8 @@
         function create() {
           y.domain(_.pluck(scope.cars, 'n'));
 
-          bar = g.selectAll('.time')
-            .data(scope.cars, function(d){
+          bar = rg.selectAll('.time')
+            .data(scope.cars, function(d) {
               return d.n;
             })
             .enter()
@@ -73,12 +75,10 @@
             .attr('y', function(d) {
               return y(d.n);
             })
-            .attr('class','time')
-            .attr('fill', function(d,i){
+            .attr('class', 'time')
+            .attr('fill', function(d, i) {
               return colorScale(i);
             })
-            // .attr('stroke','#ddd')
-            // .attr('stroke-width','.25px')
 
         }
 
@@ -87,14 +87,14 @@
           bar.data(scope.cars, function(d) {
               return d.n;
             })
-            .transition()
+            // .transition()
             .attr({
               x: function(d) {
                 return x(d.aT);
               },
               width: function(d) {
                 var w = x(d.eT) - x(d.aT);
-                if (w<0) w = 0;
+                if (w < 0) w = 0;
                 return w;
               },
               height: y.rangeBand()
