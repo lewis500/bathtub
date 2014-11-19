@@ -9,31 +9,31 @@
             top: 20,
             right: 15,
             bottom: 30,
-            left: 35
+            left: 50
           };
 
           var height = +attr.height;
-          var y = d3.scale.linear().range([height, 0]).domain([0, 65000]);
+          var y = d3.scale.linear().range([height, 0]).domain([0, Uni.numCars]);
           var x = d3.scale.linear().domain([0, Uni.numMinutes]);
           var color = d3.scale.category10();
           var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
 
+          var y2 = d3.scale.linear()
+            .domain([0, 50])
+            .range([height, 0]);
+
           var yAxis = d3.svg.axis()
             .scale(y)
-            .orient("left")
-            .ticks(5)
-            .tickFormat(function(d) {
-              return d3.format('s')(d);
-            });
+            .orient("left");
 
           var line = d3.svg.line()
             .x(function(d) {
               return x(d.t);
             })
             .y(function(d) {
-              return y(d.cumE * Uni.rescale);
+              return y(d.cumE);
             });
 
           var line2 = d3.svg.line()
@@ -41,7 +41,7 @@
               return x(d.t);
             })
             .y(function(d) {
-              return y(d.cumA * Uni.rescale);
+              return y(d.cumA);
             });
 
           var tip = d3.select(".tip");
@@ -60,6 +60,37 @@
               opacity: 0
             })
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          var path = g.append('path')
+            .attr({
+              'stroke-width': 3,
+              'stroke': 'red',
+              fill: 'none'
+            })
+
+          scope.$watch('car', draw);
+
+
+          function draw() {
+            var c = scope.car;
+            if (!c) return;
+            var data = d3.range(Uni.numMinutes)
+              .map(function(d) {
+                var SD = d - Uni.wT;
+                var SP = Math.max(-Uni.beta * SD, Uni.gamma * SD);
+                return {
+                  t: d,
+                  toll: c.getToll[c.tollType](SP, c.phi)
+                };
+              });
+
+            path.datum(data);
+
+            path.attr('d', line3);
+          }
+
+
+
 
           // bg.on('mousemove', mousemove)
           //   .on('mouseout', mouseoutFunc);
@@ -113,6 +144,14 @@
             .attr("stroke-dasharray", "2,2")
             .attr("stroke", "black");
 
+          var line3 = d3.svg.line()
+            .x(function(d) {
+              return x(d.t);
+            })
+            .y(function(d) {
+              return y2(d.toll);
+            });
+
           var drawn;
 
           scope.$on('drawEvent', update);
@@ -137,12 +176,12 @@
 
             myLine.datum(scope.minutes)
               .transition()
-              .ease('linear')
+              // .ease('linear')
               .attr("d", line);
 
             myLine2.datum(scope.minutes)
               .transition()
-              .ease('linear')
+              // .ease('linear')
               .attr("d", line2);
 
           }
@@ -152,6 +191,7 @@
         return {
           scope: {
             minutes: '=minutes',
+            car: '=car',
             // params: '=params'
           },
           link: link

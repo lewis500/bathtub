@@ -1,6 +1,6 @@
 (function(angular) {
   angular.module('mainApp')
-    .factory('Minute', function(Uni) {
+    .factory('Minute', function(Uni, findVel) {
       var Minute = {};
 
       Minute.serve = function() {

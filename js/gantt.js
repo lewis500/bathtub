@@ -87,7 +87,8 @@
           bar.data(scope.cars, function(d) {
               return d.n;
             })
-            // .transition()
+            .transition()
+            .ease('linear')
             .attr({
               x: function(d) {
                 return x(d.aT);

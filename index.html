@@ -2,56 +2,62 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <!-- ============== CSS ===================== -->
-  <title>Simulation</title>
-  <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <meta charset="utf-8">
+    <!-- ============== CSS ===================== -->
+    <title>Simulation</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 
-  <!-- bower:css -->
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-  <!-- endbower -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
 
-  <!-- include: "type": "css", "files": "styles/**/*.css" -->
-  <link rel="stylesheet" type="text/css" href="styles/main.css" />
-  <!-- /include -->
+    <!-- include: "type": "css", "files": "styles/**/*.css" -->
+    <link rel="stylesheet" type="text/css" href="styles/main.css" />
+    <!-- /include -->
 
 </head>
 <!-- ============== BODY =================== -->
 
 <body ng-app="mainApp">
-  <div class="container" ng-controller="mainCtrl as main">
-    <div class="row col-md-8">
-      <button class="btn" ng-class="{'btn-success': main.ticker.paused, 'btn-warning': !main.ticker.paused }" ng-click="main.ticker.pause()">{{main.ticker.paused ? "Play" : "Pause"}}</button>
-      <form role="form">
-        <label class="radio-inline">
-          <input type="radio" ng-model="main.Car.tollType" value="none" name="optradio">None</label>
-        <label class="radio-inline">
-          <input type="radio" ng-model="main.Car.tollType" value="distance" name="optradio">Distace</label>
-        <label class="radio-inline">
-          <input type="radio" ng-model="main.Car.tollType" value="trip" name="optradio">Trip</label>
-      </form>
-    </div>
-    <div class='col-md-8' gantt-chart cars='main.ganttSample' height='500'></div>
-    <div class="row col-md-8">
-      <form role="form">
-        <label class="radio-inline">
-          <input type="radio" ng-model="main.measure" value="queueing" name="next">Queueing</label>
-        <label class="radio-inline">
-          <input type="radio" ng-model="main.measure" value="cost" name="next">Cost</label>
-        <label class="radio-inline">
-          <input type="radio" ng-model="main.measure" value="toll" name="next">Toll</label>
-        <label class="radio-inline">
-          <input type="radio" ng-model="main.measure" value="SP" name="next">Schedule Penalty</label>
-      </form>
-    </div>
-    <div class="row col-md-8">
-      <div toll-chart car="main.whichCar" height='400' width='600'></div>
-    </div>
-    <div class='col-md-8' bar-chart change-car='main.changeCar' cars="main.barSample" measure="main.measure" height='400' width='600'></div>
+    <div class="container" ng-controller="mainCtrl as main">
+        <div class="row col-md-8">
+            <button class="btn" ng-class="{'btn-success': main.ticker.paused, 'btn-warning': !main.ticker.paused }" ng-click="main.ticker.pause()">{{main.ticker.paused ? "Play" : "Pause"}}</button>
+            <input type="number" ng-init="val = main.sampleSize" ng-model="val" min="0" max="99" ng-keydown="main.sampleSize = val" />
+            <!-- <input type="number" ng-init="V = main.Uni.V" ng-model="V" min="1" max="20" ng-keydown="main.Uni.V = V" /> -->
+            <div class = 'well'> {{main.Uni.V}}</div>
+            <form role="form">
+                <label class="radio-inline">
+                    <input type="radio" ng-model="main.Car.tollType" value="none" name="optradio">None</label>
+                <label class="radio-inline">
+                    <input type="radio" ng-model="main.Car.tollType" value="distance" name="optradio">Distace</label>
+                <label class="radio-inline">
+                    <input type="radio" ng-model="main.Car.tollType" value="trip" name="optradio">Trip</label>
+            </form>
+        </div>
 
-    <!-- <div class="col-md-8" line-chart minutes="main.minutes" height="280"></div> -->
-    <!-- <div class="col-md-8" bar-chart measure="main.measure" cars="main.cars" tip-url="tooltip.html" width="500" height="250"></div> -->
-  </div>
+        <div class='col-md-8' line-chart car="main.whichCar" minutes='main.minutes' height='250' width='600'></div>
+
+        <div class='col-md-8' gantt-chart cars='main.ganttSample' height='250'></div>
+        <div class="row col-md-8">
+            <form role="form">
+                <label class="radio-inline">
+                    <input type="radio" ng-model="main.measure" value="queueing" name="next">Queueing</label>
+                <label class="radio-inline">
+                    <input type="radio" ng-model="main.measure" value="cost" name="next">Cost</label>
+                <label class="radio-inline">
+                    <input type="radio" ng-model="main.measure" value="toll" name="next">Toll</label>
+                <label class="radio-inline">
+                    <input type="radio" ng-model="main.measure" value="SP" name="next">Schedule Penalty</label>
+            </form>
+        </div>
+        <div class="row col-md-8">
+            <!-- <div toll-chart car="main.whichCar" height='250' width='600'></div> -->
+        </div>
+        <div class='col-md-8' bar-chart change-car='main.changeCar' cars="main.barSample" measure="main.measure" height='250' width='600'></div>
+
+        <!-- <div class="col-md-8" line-chart minutes="main.minutes" height="280"></div> -->
+        <!-- <div class="col-md-8" bar-chart measure="main.measure" cars="main.cars" tip-url="tooltip.html" width="500" height="250"></div> -->
+    </div>
 </body>
 
 <!-- bower:js -->

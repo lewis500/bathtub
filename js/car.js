@@ -20,10 +20,10 @@
           var self = this;
           var pCost = this.cost;
           _.forEach(X, function(aT, x) {
-            var d = +((+x + self.km).toPrecision(2));
+            var d = Math.round(x + self.km * 100);
             var eT = Math.floor(X[d]);
-            if (eT >= Uni.numMinutes) return false;
             var u = self.getCost.apply(self, [aT, eT]);
+            if (eT >= Uni.numMinutes) return false;
             if (u < pCost) {
               self.poss = aT;
               pCost = u;

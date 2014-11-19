@@ -1,14 +1,27 @@
 (function(angular) {
 
   angular.module('mainApp')
-    .constant('Uni', {
-      numCars: 250,
-      numMinutes: 150,
-      V: 7,
-      beta: .5,
-      gamma: 2,
-      wT: 100,
-      toll: 'none'
+    .factory('Uni', function() {
+      var Uni = {
+        numCars: 5000,
+        numMinutes: 150,
+        beta: .5,
+        gamma: 1,
+        wT: 100,
+        toll: 'none',
+        v0: .25
+      };
+
+      Uni.V = Uni.v0 * Uni.numCars / 4 * .7;
+
+      return Uni;
+    });
+
+  angular.module('mainApp')
+    .factory('findVel', function(Uni) {
+      return function(u) {
+        return Uni.v0 * (1.0 - u / Uni.numCars * 2);
+      };
     });
 
   angular.module('mainApp')
@@ -28,21 +41,15 @@
       self.changeCar = function(v) {
         self.whichCar = v;
         $scope.$apply();
-        // $scope.$broadcast('carSelect');
       };
+
+      // self.Uni = Uni;
 
       self.barSample = [];
       self.ganttSample = [];
 
-      var X = (function makeX() {
-        var res = {};
-        var x = findVel(0) + self.increment;
-        while (x <= findVel(0) * Uni.numMinutes) {
-          res[+x.toPrecision(2)] = 0;
-          x += self.increment;
-        }
-        return res;
-      })();
+      var X = d3.range(0, 220 * 100);
+      // debugger;
 
       // tick.scale = d3.scale.linear();
       var scale = d3.scale.linear();
@@ -50,7 +57,7 @@
       self.init = function() {
         var n = 0;
         var w = 0;
-        self.cars = linspace2(.5, 3, Uni.numCars)
+        self.cars = linspace2(1, 3, Uni.numCars)
           .map(function(d, i) {
             var km = rounder(d);
             var newCar = Object.create(Car);
@@ -58,9 +65,17 @@
             n++;
             w += km;
             newCar.init(n, km, w, aT);
-            if (i % 5 === 0) self.barSample.push(newCar);
-            if (i % 3 === 0) self.ganttSample.push(newCar);
             return newCar;
+          });
+
+        self.barSample = linspace(0, Uni.numCars - 1, 75)
+          .map(function(d) {
+            return self.cars[d];
+          });
+
+        self.ganttSample = linspace(0, Uni.numCars - 1, 75)
+          .map(function(d) {
+            return self.cars[d];
           });
 
         Uni.phiMax = self.cars[self.cars.length - 1].phi;
@@ -79,7 +94,7 @@
         self.whichCar = self.cars[self.cars.length - 1];
       };
 
-      self.sampleSize = 5;
+      self.sampleSize = 2;
       self.init();
 
       function tick() {
@@ -95,7 +110,7 @@
         // .domain(_.pluck(self.minutes, 'X'))
         // .range(_.pluck(self.minutes, 't'));
         _.forEach(X, function(val, key) {
-          var val = Math.floor(scale(+key));
+          var val = Math.floor(scale(+key / 100));
           X[key] = val;
         });
 
@@ -141,9 +156,4 @@ function linspace2(a, b, n) {
   return _.range(0, n + 1).map(function(d) {
     return a + d * Q;
   });
-}
-
-
-function findVel(u) {
-  return .13 * (1.0 - (Math.max(u / 250, .2)));
 }
