@@ -1,3 +1,17 @@
+add the bars coming out the side
+have the toll thing update with broadcast
+put the cost metrics on there
+
+
+
+make the cars spread out less initially
+get rid of this stupid rounder thing
+draw a velocity line on the chart, too
+choose a correct size for X
+figure out why cars sometimes try to go off the map
+XT should go up to, at the most, the free-flow velocity times the number of minutes
+
+
 make the V and hte phi's responsive
 show the aggregate measures
 make X less precise

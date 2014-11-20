@@ -18,9 +18,20 @@ body {
 .line {
     fill: none;
     stroke-width: 2px;
+    text-anchor: 'end';
+    stroke: black;
       /*shape-rendering: crispEdges;*/
-
 }
+
+.line.arrival{
+    stroke-dasharray: 2, 2;
+}
+
+.line.vel{
+    stroke: green;
+    opacity: .65;
+}
+
 .scatterDot circle {
     stroke: none;
     fill:'crimson';
@@ -33,11 +44,12 @@ body {
     background-color: #222;
     pointer-events: none;
     padding: 8px;
-    /*position: absolute;*/
+    position: absolute;
     font-size: 13px;
     border: 0px;
     border-radius: 2px;
     z-index: 1000;
+    opacity: 0;
     /*width: 100px;*/
 }
 .tip table {

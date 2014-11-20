@@ -31,14 +31,14 @@
           .append("svg")
           .style('width', "100%")
           .attr("height", height + margin.top + margin.bottom)
-        .append("g")
+          .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
         var bg = svg.append('rect')
           .attr('height', height)
           .attr('fill', '#222');
-          
+
         var rg = svg.append('g').attr('class', 'g-bar');
 
         var gXAxis = svg.append("g")
@@ -47,23 +47,8 @@
 
         var drawn, bar;
 
-        scope.$on('drawEvent', update);
-
-        $(window).on('resize', render);
-
-        render();
-
-        function render() {
-          var width = d3.select(el[0]).node().offsetWidth - margin.left - margin.right;
-          x.range([0, width]);
-          gXAxis.call(xAxis);
-          bg.attr('width', width);
-
-          if (drawn) update();
-          else create();
-        }
-
-        function create() {
+        scope.$watch('cars.length', function() {
+          if (!scope.cars) return;
           y.domain(_.pluck(scope.cars, 'n'));
 
           bar = rg.selectAll('.time')
@@ -78,8 +63,23 @@
             .attr('class', 'time')
             .attr('fill', function(d, i) {
               return colorScale(i);
-            })
+            });
 
+        })
+
+        scope.$on('drawEvent', update);
+
+        $(window).on('resize', render);
+
+        render();
+
+        function render() {
+          var width = d3.select(el[0]).node().offsetWidth - margin.left - margin.right;
+          x.range([0, width]);
+          gXAxis.call(xAxis);
+          bg.attr('width', width);
+
+          if (drawn) update();
         }
 
         function update() {

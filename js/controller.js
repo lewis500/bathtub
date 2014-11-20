@@ -9,59 +9,105 @@
         gamma: 1,
         wT: 100,
         toll: 'none',
-        v0: .25
+        V: 97
+          // v0: .25,
       };
 
-      Uni.V = Uni.v0 * Uni.numCars / 4 * .7;
-
+      // Uni.V = Uni.v0 * Uni.numCars / 4 * .7;
       return Uni;
     });
 
   angular.module('mainApp')
     .factory('findVel', function(Uni) {
-      return function(u) {
-        return Uni.v0 * (1.0 - u / Uni.numCars * 2);
+      return function findVel(u) {
+        u = 13 * u;
+        if (u <= 12000) return 30.8 * Math.exp(-u * 1.405e-4) / 60;
+        var v1 = 30.8 * Math.exp(-12000 * 1.405e-4) / 60;
+        return Math.max(v1 - (u - 12000) * 7.1e-4 / 60, 0);
       };
     });
 
   angular.module('mainApp')
-    .controller('mainCtrl', function($scope, Runner, Minute, Car, Uni) {
+    .controller('mainCtrl', function($scope, Runner, Minute, Car, Uni, findVel) {
       var self = this;
-
-      function rounder(d) {
-        return +(Math.round(d / self.increment) * self.increment).toFixed(2);
-      }
-
-      self.increment = .01;
-
+      var increment = .01;
       self.measure = "queueing";
       self.whichCar = null;
       self.Car = Car;
+      self.Uni = Uni;
+      self.barSample = [];
+      self.ganttSample = [];
+      var X = linspace(0, findVel(0) * Uni.numMinutes, increment);
+      var scale = d3.scale.linear();
+      self.sampleSize = 25;
 
       self.changeCar = function(v) {
         self.whichCar = v;
         $scope.$apply();
       };
 
-      // self.Uni = Uni;
+      init();
 
-      self.barSample = [];
-      self.ganttSample = [];
+      var drawBroadcaster = _.throttle(function() {
+        $scope.$broadcast('drawEvent');
+        $scope.$apply();
 
-      var X = d3.range(0, 220 * 100);
-      // debugger;
+      }, 1000);
 
-      // tick.scale = d3.scale.linear();
-      var scale = d3.scale.linear();
+      self.changeToll = function(v) {
+        Uni.toll = v;
+      };
 
-      self.init = function() {
+      self.metrics = {
+        cost: 0,
+        toll: 0,
+        SP: 0,
+        queueing: 0
+      };
+
+
+      function tick() {
+        _.invoke(self.minutes, 'serve');
+        var dom = [],
+          ran = [];
+        _.forEach(self.minutes, function(m) {
+          dom.push(m.X);
+          ran.push(m.t);
+        });
+        scale.domain(dom).range(ran);
+        _.forEach(X, function(val, key) {
+          var val = Math.floor(scale(+key / 100));
+          X[key] = val;
+        });
+
+        var s = _.sample(self.cars, self.sampleSize);
+        _.forEach(s, function(d) {
+          d.choose(X);
+        });
+        self.cars.forEach(function(car, i) {
+          car.place(self.minutes);
+          _.forEach(self.metrics, function(val, key) {
+            if (i == 0) self.metrics[key] = 0;
+            self.metrics[key] += car[key];
+          });
+        });
+
+        drawBroadcaster();
+
+      }
+
+      function rounder(d) {
+        return +(Math.round(d / increment) * increment).toFixed(2);
+      }
+
+      function init() {
         var n = 0;
         var w = 0;
-        self.cars = linspace2(1, 3, Uni.numCars)
+        self.cars = linspace2(.5, 3, Uni.numCars)
           .map(function(d, i) {
             var km = rounder(d);
             var newCar = Object.create(Car);
-            var aT = _.random(0, Uni.numMinutes - 1);
+            var aT = _.random(.2 * Uni.numMinutes, .8 * Uni.numMinutes);
             n++;
             w += km;
             newCar.init(n, km, w, aT);
@@ -92,52 +138,13 @@
         });
 
         self.whichCar = self.cars[self.cars.length - 1];
-      };
 
-      self.sampleSize = 2;
-      self.init();
+        var runner = Runner;
+        self.ticker = runner.addRepeater('tick', tick, 50, 'pace');
+        self.ticker.start();
 
-      function tick() {
-        _.invoke(self.minutes, 'serve');
-        var dom = [],
-          ran = [];
-        _.forEach(self.minutes, function(m) {
-          dom.push(m.X);
-          ran.push(m.t);
-        });
-        scale.domain(dom).range(ran);
-
-        // .domain(_.pluck(self.minutes, 'X'))
-        // .range(_.pluck(self.minutes, 't'));
-        _.forEach(X, function(val, key) {
-          var val = Math.floor(scale(+key / 100));
-          X[key] = val;
-        });
-
-        var s = _.sample(self.cars, self.sampleSize);
-        _.forEach(s, function(d) {
-          d.choose(X);
-        });
-        _.invoke(s, 'makeChoice');
-        self.cars.forEach(function(car) {
-          car.place(self.minutes);
-        });
-
-        drawBroadcaster();
       }
 
-      var drawBroadcaster = _.throttle(function() {
-        $scope.$broadcast('drawEvent')
-
-      }, 1000);
-
-      self.changeToll = function(v) {
-        Uni.toll = v;
-      };
-
-      var runner = Runner;
-      self.ticker = runner.addRepeater('tick', tick, 50, 'pace');
-      self.ticker.start();
     });
 
 })(window.angular);

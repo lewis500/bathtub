@@ -19,15 +19,20 @@
         });
         this.cumE = numE;
         this.cumA = this.arrivals;
-        this.X = this.vel;
+        // this.X = this.vel;
         this.queue = [];
         this.arrivals = 0;
 
+        // this.X = (prev?)
+
         var prev = this.prev;
-        if (!prev) return;
+        if (!prev) {
+          this.X = 0;
+          return;
+        }
         this.cumE += prev.cumE;
         this.cumA += prev.cumA;
-        this.X += prev.X;
+        this.X = prev.X + prev.vel;
       };
 
       Minute.receive = function(car) {

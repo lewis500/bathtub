@@ -2,7 +2,7 @@
 
   angular.module('mainApp')
     .directive('lineChart',
-      function(Uni) {
+      function(Uni, Car, findVel) {
 
         var link = function(scope, el, attr) {
           var margin = {
@@ -12,21 +12,25 @@
             left: 50
           };
 
+          var tip = d3.select(".tip");
+
           var height = +attr.height;
           var y = d3.scale.linear().range([height, 0]).domain([0, Uni.numCars]);
           var x = d3.scale.linear().domain([0, Uni.numMinutes]);
-          var color = d3.scale.category10();
           var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
+          var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
 
           var y2 = d3.scale.linear()
             .domain([0, 50])
             .range([height, 0]);
 
-          var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
+          var y3 = d3.scale.linear()
+            .domain([0, findVel(0)])
+            .range([height, 0]);
 
           var line = d3.svg.line()
             .x(function(d) {
@@ -42,6 +46,22 @@
             })
             .y(function(d) {
               return y(d.cumA);
+            });
+
+          var line3 = d3.svg.line()
+            .x(function(d) {
+              return x(d.t);
+            })
+            .y(function(d) {
+              return y2(d.toll);
+            });
+
+          var lineSpeed = d3.svg.line()
+            .x(function(d) {
+              return x(d.t);
+            })
+            .y(function(d) {
+              return y3(d.vel);
             });
 
           var tip = d3.select(".tip");
@@ -61,17 +81,63 @@
             })
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-          var path = g.append('path')
+          var tollLine = g.append('path')
             .attr({
               'stroke-width': 3,
               'stroke': 'red',
               fill: 'none'
+            });
+
+          var gXAxis = g.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")");
+
+          var xAxisText = gXAxis.append("text")
+            .attr({
+              y: -15,
+              dy: '.71em',
+              'text-anchor': 'end'
             })
+            .text("time");
 
-          scope.$watch('car', draw);
+          var gYAxis = g.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr({
+              transform: "rotate(-90)",
+              y: 6,
+              dy: '.71em',
+              'text-anchor': 'end'
+            })
+            .text("cumulative veh");
 
+          var exitLine = g.append("path")
+            .attr("class", "line exit");
 
-          function draw() {
+          var arrLine = g.append("path")
+            .attr("class", "line arrival");
+
+          var velLine = g.append('path')
+            .attr('class', 'line vel');
+
+          var drawn;
+
+          scope.$watch('car', drawToll);
+          scope.$watch(function() {
+            return Uni.V;
+          }, drawToll);
+          scope.$watch(function() {
+            return Car.tollType;
+          }, drawToll);
+
+          scope.$on('drawEvent', update);
+
+          $(window).on('resize', render);
+
+          render();
+
+          function drawToll() {
             var c = scope.car;
             if (!c) return;
             var data = d3.range(Uni.numMinutes)
@@ -80,85 +146,36 @@
                 var SP = Math.max(-Uni.beta * SD, Uni.gamma * SD);
                 return {
                   t: d,
-                  toll: c.getToll[c.tollType](SP, c.phi)
+                  toll: c.getToll[c.tollType].call(c, SP)
                 };
               });
 
-            path.datum(data);
+            tollLine.datum(data);
 
-            path.attr('d', line3);
+            tollLine.attr('d', line3);
           }
 
+          bg.on('mousemove', mousemove)
+            .on('mouseout', mouseoutFunc);
 
-
-
-          // bg.on('mousemove', mousemove)
-          //   .on('mouseout', mouseoutFunc);
-
-          // function mousemove() {
-          //   var u = _.find(scope.minutes, function(v) {
-          //     var e = x.invert(d3.mouse(this)[0]);
-          //     return v.time >= e;
-          //   }, this);
-
-          //   scope.$apply(function() {
-          //     scope.param.info = u;
-          //   });
-          //   tip.style("opacity", .9)
-          //     .style("left", (d3.event.pageX) + "px")
-          //     .style("top", (d3.event.pageY - 150) + "px");
-          // }
-
-          // function mouseoutFunc(d) {
-          //   tip.style("opacity", 0);
-          // }
-
-          var gXAxis = g.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")");
-
-          var xAxisText = gXAxis.append("text")
-            .attr("y", -15)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text("time");
-
-          var gYAxis = g.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-            .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text("cumulative veh");
-
-          var myLine = g.append("path")
-            .attr("class", "line")
-            .attr("stroke-width", "2px")
-            .attr("stroke", "black");
-
-          var myLine2 = g.append("path")
-            .attr("class", "line")
-            .attr("stroke-width", "2px")
-            .attr("stroke-dasharray", "2,2")
-            .attr("stroke", "black");
-
-          var line3 = d3.svg.line()
-            .x(function(d) {
-              return x(d.t);
-            })
-            .y(function(d) {
-              return y2(d.toll);
+          function mousemove() {
+            var e = x.invert(d3.mouse(this)[0]);
+            var u = _.find(scope.minutes, function(v) {
+              return v.t >= e;
             });
 
-          var drawn;
+            scope.$apply(function() {
+              scope.info = u;
+            });
 
-          scope.$on('drawEvent', update);
+            tip.style("opacity", .9)
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY - 150) + "px");
+          }
 
-          $(window).on('resize', render);
-
-          render();
+          function mouseoutFunc(d) {
+            tip.style("opacity", 0);
+          }
 
           function render() {
             var width = d3.select(el[0]).node().offsetWidth - margin.left - margin.right;
@@ -174,15 +191,20 @@
           function update() {
             if (!drawn) drawn = true;
 
-            myLine.datum(scope.minutes)
+            exitLine.datum(scope.minutes)
               .transition()
-              // .ease('linear')
+              .ease('linear')
               .attr("d", line);
 
-            myLine2.datum(scope.minutes)
+            arrLine.datum(scope.minutes)
               .transition()
-              // .ease('linear')
+              .ease('linear')
               .attr("d", line2);
+
+            velLine.datum(scope.minutes)
+              .transition()
+              .ease('linear')
+              .attr('d', lineSpeed);
 
           }
 
@@ -192,9 +214,10 @@
           scope: {
             minutes: '=minutes',
             car: '=car',
-            // params: '=params'
+            info: '=info'
           },
-          link: link
+          link: link,
+          templateUrl: 'tooltip.html'
         };
 
       }

@@ -1,6 +1,6 @@
 (function() {
   angular.module('mainApp')
-    .factory('Car', function(Uni) {
+    .factory('Car', function(Uni, findVel) {
 
       var Car = {
         init: function(n, km, w, aT) {
@@ -9,50 +9,52 @@
             km: km,
             aT: aT,
             eT: null,
-            poss: 0,
+            // poss: Uni.wT,
             cost: 0,
+            queueing: 0,
+            toll: 0,
+            SP: 0,
             kmLeft: km,
-            phi: w * (Uni.beta * Uni.gamma) / (Uni.beta + Uni.gamma) / Uni.V,
+            phi: w * (Uni.beta * Uni.gamma) / (Uni.beta + Uni.gamma),
           });
         },
-        tollType: 'none',
+        tollType: 'trip',
         choose: function(X) {
           var self = this;
           var pCost = this.cost;
           _.forEach(X, function(aT, x) {
+            // if (aT === 0) return;
             var d = Math.round(x + self.km * 100);
             var eT = Math.floor(X[d]);
-            var u = self.getCost.apply(self, [aT, eT]);
             if (eT >= Uni.numMinutes) return false;
+            var u = self.getCost(aT, eT);
             if (u < pCost) {
-              self.poss = aT;
+              self.aT = aT;
               pCost = u;
             }
-          });
+          }, self);
         },
         getToll: {
-          distance: function(SP, phi) {
-            return Math.max(phi - SP, 0);
+          distance: function(SP) {
+            return Math.max(this.phi / Uni.V - SP, 0);
           },
           trip: function(SP) {
-            return Math.max(Uni.phiMax - SP, 0);
+            return Math.max(Uni.phiMax / Uni.V - SP, 0);
           },
           none: function(eT) {
             return 0;
           }
         },
-        makeChoice: function() {
-          this.aT = this.poss;
-        },
         getCost: function(aT, eT) {
           var SD = (eT - Uni.wT);
-          var SP = Math.max(-Uni.beta * SD, Uni.gamma * SD);
-          return SP + (eT - aT) + this.getToll[this.tollType](SP, this.phi);
+          var SP = SD <= 0 ? -Uni.beta * SD : Uni.gamma * SD;
+          // Math.max(-Uni.beta * SD, Uni.gamma * SD);
+          return SP + (eT - aT) + this.getToll[this.tollType].call(this, SP);
         },
         evalCost: function() {
           var SD = (this.eT - Uni.wT);
           this.SP = Math.max(-Uni.beta * SD, Uni.gamma * SD);
-          this.toll = this.getToll[this.tollType](this.SP, this.phi);
+          this.toll = this.getToll[this.tollType].call(this, this.SP);
           this.queueing = this.eT - this.aT;
           this.cost = this.toll + this.SP + this.queueing;
         },

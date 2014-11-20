@@ -69,9 +69,9 @@
             gXAxis.call(xAxis);
           }
 
-          var b = d3.extent(data, function(d) {
+          var b = [0, d3.max(data, function(d) {
             return d[measure]
-          });
+          })];
 
           y.domain(b);
 
@@ -93,12 +93,12 @@
           });
 
           bar
-          // .transition()
-          // .duration(150)
-          // .ease('linear')
-          // .delay(function(d, i) {
-          //   return 1 * i;
-          // })
+            .transition()
+            .duration(250)
+            .ease('cubic')
+            .delay(function(d, i) {
+              return 1.5 * i;
+            })
             .attr("x", function(d) {
               return x(d.phi);
             })
