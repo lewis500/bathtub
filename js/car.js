@@ -23,7 +23,6 @@
           var self = this;
           var pCost = this.cost;
           _.forEach(X, function(aT, x) {
-            // if (aT === 0) return;
             var d = Math.round(x + self.km * 100);
             var eT = Math.floor(X[d]);
             if (eT >= Uni.numMinutes) return false;
@@ -48,7 +47,6 @@
         getCost: function(aT, eT) {
           var SD = (eT - Uni.wT);
           var SP = SD <= 0 ? -Uni.beta * SD : Uni.gamma * SD;
-          // Math.max(-Uni.beta * SD, Uni.gamma * SD);
           return SP + (eT - aT) + this.getToll[this.tollType].call(this, SP);
         },
         evalCost: function() {
