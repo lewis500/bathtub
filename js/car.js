@@ -3,22 +3,23 @@
     .factory('Car', function(Uni, findVel) {
 
       var Car = {
-        init: function(n, km, w, aT) {
+        init: function(n, km, wT, aT) {
           _.assign(this, {
             n: n,
             km: km,
             aT: aT,
             eT: null,
+            wT: 0,
             // poss: Uni.wT,
             cost: 0,
             queueing: 0,
-            toll: 0,
+            // toll: 0,
             SP: 0,
             kmLeft: km,
-            phi: w * (Uni.beta * Uni.gamma) / (Uni.beta + Uni.gamma),
+            // phi: w * (Uni.beta * Uni.gamma) / (Uni.beta + Uni.gamma),
           });
         },
-        tollType: 'trip',
+        // tollType: 'trip',
         choose: function(X) {
           var self = this;
           var pCost = this.cost;
@@ -33,21 +34,27 @@
             }
           }, self);
         },
-        getToll: {
-          distance: function(SP) {
-            return Math.max(this.phi / Uni.V - SP, 0);
-          },
-          trip: function(SP) {
-            return Math.max(Uni.phiMax / Uni.V - SP, 0);
-          },
-          none: function(eT) {
-            return 0;
-          }
-        },
+        // getToll: {
+        //   distance: function(SP) {
+        //     return Math.max(this.phi / Uni.V - SP, 0);
+        //   },
+        //   trip: function(SP) {
+        //     return Math.max(Uni.phiMax / Uni.V - SP, 0);
+        //   },
+        //   none: function(eT) {
+        //     return 0;
+        //   }
+        // },
         getCost: function(aT, eT) {
-          var SD = (eT - Uni.wT);
-          var SP = SD <= 0 ? -Uni.beta * SD : Uni.gamma * SD;
-          return SP + (eT - aT) + this.getToll[this.tollType].call(this, SP);
+          var a = this.wT;
+          var b = 2;
+          var c = Uni.numMinutes;
+          var timeAtHome = -e(b * -(aT-a)/c) / b;
+          var timeAtWork = -e(b * (eT-a)/c) / b;
+          return timeAtWork + timeAtHome;
+          // var SD = (eT - Uni.wT);
+          // var SP = SD <= 0 ? -Uni.beta * SD : Uni.gamma * SD;
+          // return SP + (eT - aT) + this.getToll[this.tollType].call(this, SP);
         },
         evalCost: function() {
           var SD = (this.eT - Uni.wT);
