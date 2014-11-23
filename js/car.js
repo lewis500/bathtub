@@ -1,6 +1,7 @@
 (function() {
   angular.module('mainApp')
     .factory('Car', function(Uni, findVel) {
+      var b = 2;
 
       var Car = {
         init: function(n, km, wT, aT) {
@@ -9,59 +10,47 @@
             km: km,
             aT: aT,
             eT: null,
-            wT: 0,
-            // poss: Uni.wT,
+            wT: wT,
             cost: 0,
             queueing: 0,
-            // toll: 0,
             SP: 0,
             kmLeft: km,
-            // phi: w * (Uni.beta * Uni.gamma) / (Uni.beta + Uni.gamma),
+            utilHome: 0,
+            utilWork: 0
           });
         },
-        // tollType: 'trip',
-        choose: function(X) {
+        choose: function(minutes, scale) {
           var self = this;
           var pCost = this.cost;
-          _.forEach(X, function(aT, x) {
-            var d = Math.round(x + self.km * 100);
-            var eT = Math.floor(X[d]);
-            if (eT >= Uni.numMinutes) return false;
-            var u = self.getCost(aT, eT);
-            if (u < pCost) {
-              self.aT = aT;
+          minutes.forEach(function(d, i) {
+            var eT = scale(d.X + self.km);
+            if (eT >= Uni.numMinutes) return;
+            var u = self.getCost.call({
+              wT: self.wT
+            }, d.t, eT);
+            if (u >= pCost) {
+              self.aT = d.t;
               pCost = u;
             }
-          }, self);
+          });
         },
-        // getToll: {
-        //   distance: function(SP) {
-        //     return Math.max(this.phi / Uni.V - SP, 0);
-        //   },
-        //   trip: function(SP) {
-        //     return Math.max(Uni.phiMax / Uni.V - SP, 0);
-        //   },
-        //   none: function(eT) {
-        //     return 0;
-        //   }
-        // },
         getCost: function(aT, eT) {
-          var a = this.wT;
-          var b = 2;
-          var c = Uni.numMinutes;
-          var timeAtHome = -e(b * -(aT-a)/c) / b;
-          var timeAtWork = -e(b * (eT-a)/c) / b;
-          return timeAtWork + timeAtHome;
-          // var SD = (eT - Uni.wT);
-          // var SP = SD <= 0 ? -Uni.beta * SD : Uni.gamma * SD;
-          // return SP + (eT - aT) + this.getToll[this.tollType].call(this, SP);
+          // var res = boo ? this : {};
+          this.travel_time = aT - eT;
+          this.utilHome = 1 - Math.exp(-b * (aT - this.wT) / Uni.numMinutes) / b;
+          this.utilWork = 1 - Math.exp(b * (eT - this.wT) / Uni.numMinutes) / b;
+          return (this.cost = this.utilWork + this.utilHome);
         },
         evalCost: function() {
-          var SD = (this.eT - Uni.wT);
-          this.SP = Math.max(-Uni.beta * SD, Uni.gamma * SD);
-          this.toll = this.getToll[this.tollType].call(this, this.SP);
-          this.queueing = this.eT - this.aT;
-          this.cost = this.toll + this.SP + this.queueing;
+          this.getCost.call(this, this.aT, this.eT);
+
+          // var a = this.wT;
+          // var c = Uni.numMinutes;
+          // this.travel_time = this.aT - this.eT;
+          // this.utilHome = 1 - Math.exp(-b * (this.aT - a) / c) / b;
+          // this.utilWork = 1 - Math.exp(b * (this.eT - a) / c) / b;
+          // this.cost = this.utilHome + this.utilWork;
+          // return this.cost;
         },
         place: function(minutes) {
           var M = minutes[this.aT];

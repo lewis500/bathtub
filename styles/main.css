@@ -59,3 +59,12 @@ body {
 .lineLabel{
     font-size: 14px;
 }
+
+.highlighted{
+    stroke-width: 1;
+    stroke: white;
+}
+
+.dehighlighted{
+    opacity: .6;
+}

@@ -22,41 +22,24 @@
     <div class="container" ng-controller="mainCtrl as main">
         <div class="row col-md-8">
             <button class="btn" ng-class="{'btn-success': main.ticker.paused, 'btn-warning': !main.ticker.paused }" ng-click="main.ticker.pause()">{{main.ticker.paused ? "Play" : "Pause"}}</button>
-            <input type="number" ng-init="val = main.sampleSize" ng-model="val" min="0" max="99" ng-keydown="main.sampleSize = val" />
-            <input type="number" ng-init="V = main.Uni.V" ng-model="V" ng-keydown="main.Uni.V = V" />
-            <form role="form">
-                <label class="radio-inline">
-                    <input type="radio" ng-model="main.Car.tollType" value="none" name="optradio">None</label>
-                <label class="radio-inline">
-                    <input type="radio" ng-model="main.Car.tollType" value="distance" name="optradio">Distace</label>
-                <label class="radio-inline">
-                    <input type="radio" ng-model="main.Car.tollType" value="trip" name="optradio">Trip</label>
+            <!-- <input type="number" ng-init="val = main.sampleSize" ng-model="val" min="0" max="99" ng-keydown="main.sampleSize = val" /> -->
+        </div>
+
+        <div class='col-md-8' line-chart info='main.info' minutes='main.minutes' time-line="main.timeLine" height='250' width='600'></div>
+        <div class='col-md-8' ng-include="'partials/table.html'"></div>
+        <div class="col-md-8">
+            <form role="form" class='pull-right'>
+                <label class="radio-inline" ng-repeat='(key,val) in main.metrics'>
+                    <input type="radio" ng-model="main.measure" value="{{key}}" name="next" >{{key}}</label>
             </form>
         </div>
+        <br>
 
-        <div class='col-md-8' line-chart car="main.whichCar" info='main.info' minutes='main.minutes' height='250' width='600'></div>
-
-        <div class='col-md-8' gantt-chart cars='main.ganttSample' height='250'></div>
-        <div ng-include="'partials/table.html'"></div>
+        <div class='col-md-8' gantt-chart time-line="main.timeLine" cars='main.ganttSample' height='650' measure='main.measure'></div>
         <div class="row col-md-8">
-            <form role="form">
-                <label class="radio-inline">
-                    <input type="radio" ng-model="main.measure" value="queueing" name="next">Queueing</label>
-                <label class="radio-inline">
-                    <input type="radio" ng-model="main.measure" value="cost" name="next">Cost</label>
-                <label class="radio-inline">
-                    <input type="radio" ng-model="main.measure" value="toll" name="next">Toll</label>
-                <label class="radio-inline">
-                    <input type="radio" ng-model="main.measure" value="SP" name="next">Schedule Penalty</label>
-            </form>
         </div>
-        <div class="row col-md-8">
-            <!-- <div toll-chart car="main.whichCar" height='250' width='600'></div> -->
-        </div>
-        <div class='col-md-8' bar-chart change-car='main.changeCar' cars="main.barSample" measure="main.measure" height='250' width='600'></div>
+        <!-- <div class='col-md-8' bar-chart cars="main.barSample" measure="main.measure" height='250' width='600'></div> -->
 
-        <!-- <div class="col-md-8" line-chart minutes="main.minutes" height="280"></div> -->
-        <!-- <div class="col-md-8" bar-chart measure="main.measure" cars="main.cars" tip-url="tooltip.html" width="500" height="250"></div> -->
     </div>
 </body>
 

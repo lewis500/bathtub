@@ -19,12 +19,8 @@
         });
         this.cumE = numE;
         this.cumA = this.arrivals;
-        // this.X = this.vel;
         this.queue = [];
         this.arrivals = 0;
-
-        // this.X = (prev?)
-
         var prev = this.prev;
         if (!prev) {
           this.X = 0;

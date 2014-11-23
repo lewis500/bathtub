@@ -7,7 +7,7 @@
         var link = function(scope, el, attr) {
           var margin = {
             top: 20,
-            right: 15,
+            right: 35,
             bottom: 30,
             left: 50
           };
@@ -24,9 +24,9 @@
             .scale(y)
             .orient("left");
 
-          var y2 = d3.scale.linear()
-            .domain([0, 50])
-            .range([height, 0]);
+          // var y2 = d3.scale.linear()
+          //   .domain([0, 50])
+          //   .range([height, 0]);
 
           var y3 = d3.scale.linear()
             .domain([0, findVel(0)])
@@ -48,13 +48,13 @@
               return y(d.cumA);
             });
 
-          var line3 = d3.svg.line()
-            .x(function(d) {
-              return x(d.t);
-            })
-            .y(function(d) {
-              return y2(d.toll);
-            });
+          // var line3 = d3.svg.line()
+          //   .x(function(d) {
+          //     return x(d.t);
+          //   })
+          //   .y(function(d) {
+          //     return y2(d.toll);
+          //   });
 
           var lineSpeed = d3.svg.line()
             .x(function(d) {
@@ -63,6 +63,8 @@
             .y(function(d) {
               return y3(d.vel);
             });
+
+
 
           var tip = d3.select(".tip");
 
@@ -80,6 +82,17 @@
               opacity: 0
             })
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          var timeLine = g.append('line')
+            .attr({
+              y1: 0,
+              y2: height,
+              // opacity: 0,
+              stroke: 'black',
+              fill: 'none',
+              'stroke-width': '2px',
+              'stroke-dasharray': '3, 3, 1'
+            });
 
           var tollLine = g.append('path')
             .attr({
@@ -123,13 +136,17 @@
 
           var drawn;
 
-          scope.$watch('car', drawToll);
-          scope.$watch(function() {
-            return Uni.V;
-          }, drawToll);
-          scope.$watch(function() {
-            return Car.tollType;
-          }, drawToll);
+          // scope.$watch('car', drawToll);
+          // scope.$watch(function() {
+          //   return Uni.V;
+          // }, drawToll);
+          // scope.$watch(function() {
+          //   return Car.tollType;
+          // }, drawToll);
+
+          scope.$watch('timeLine', function() {
+            timeLine.transition().attr('transform', 'translate(' + [x(scope.timeLine), 0] + ')')
+          });
 
           scope.$on('drawEvent', update);
 
@@ -137,23 +154,23 @@
 
           render();
 
-          function drawToll() {
-            var c = scope.car;
-            if (!c) return;
-            var data = d3.range(Uni.numMinutes)
-              .map(function(d) {
-                var SD = d - Uni.wT;
-                var SP = Math.max(-Uni.beta * SD, Uni.gamma * SD);
-                return {
-                  t: d,
-                  toll: c.getToll[c.tollType].call(c, SP)
-                };
-              });
+          // function drawToll() {
+          //   var c = scope.car;
+          //   if (!c) return;
+          //   var data = d3.range(Uni.numMinutes)
+          //     .map(function(d) {
+          //       var SD = d - Uni.wT;
+          //       var SP = Math.max(-Uni.beta * SD, Uni.gamma * SD);
+          //       return {
+          //         t: d,
+          //         toll: c.getToll[c.tollType].call(c, SP)
+          //       };
+          //     });
 
-            tollLine.datum(data);
+          //   tollLine.datum(data);
 
-            tollLine.attr('d', line3);
-          }
+          //   tollLine.attr('d', line3);
+          // }
 
           bg.on('mousemove', mousemove)
             .on('mouseout', mouseoutFunc);
@@ -214,7 +231,8 @@
           scope: {
             minutes: '=minutes',
             car: '=car',
-            info: '=info'
+            info: '=info',
+            timeLine: '=timeLine'
           },
           link: link,
           templateUrl: 'tooltip.html'
