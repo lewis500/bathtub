@@ -37,6 +37,22 @@
           .attr('height', height)
           .attr('fill', '#222');
 
+        var bg2 = svg.append('rect')
+          .attr('height', height)
+          .attr('fill', '#222');
+
+        var sep = svg.append('line')
+          .attr({
+            y1: 0,
+            y2: height,
+            stroke: 'white',
+            'stroke-width': 2,
+            'stroke-dasharray': '2 , 2'
+          });
+        // .attr('transform', 'translate(')
+
+        var both;
+
         var rg = svg.append('g').attr('class', 'g-bar');
 
         var gXAxis = svg.append("g")
@@ -82,14 +98,13 @@
             .attr('height', y.rangeBand())
             .on({
               'mouseover': function(d) {
-                bar1.classed('highlighted', function(v) {
+                both.classed('highlighted', function(v) {
                   return d.wT == v.wT;
                 });
-                bar1.classed('dehighlighted', function(v) {
+                both.classed('dehighlighted', function(v) {
                   return d.wT !== v.wT;
                 });
-                timeLine
-                  .attr('transform', 'translate(' + [x(d.wT), 0] + ')')
+                timeLine.attr('transform', 'translate(' + [x(d.wT), 0] + ')')
                   .attr('opacity', 1);
 
                 scope.$apply(function() {
@@ -98,11 +113,8 @@
 
               },
               'mouseout': function(d) {
-                bar1
-                  .classed('highlighted', false)
-                bar1
-                  .classed('dehighlighted', false);
-
+                both.classed('highlighted', false)
+                both.classed('dehighlighted', false);
                 timeLine.attr('opacity', 0);
               }
             });
@@ -116,8 +128,11 @@
               fill: function(d, i) {
                 return colorScale(i);
               },
+              class: 'time',
               height: y.rangeBand()
             });
+
+          both = d3.selectAll('rect.time')
 
         });
 
@@ -134,7 +149,12 @@
           x2.range([0, width - w1]);
           gXAxis.call(xAxis);
           bg.attr('width', w1);
-
+          bg2.attr('width', width - w1);
+          bg2.attr('transform', 'translate(' + [w1, 0] + ')');
+          sep.attr({
+            x1: w1,
+            x2: w1
+          });
           if (drawn) update();
         }
 

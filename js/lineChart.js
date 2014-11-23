@@ -7,7 +7,7 @@
         var link = function(scope, el, attr) {
           var margin = {
             top: 20,
-            right: 35,
+            right: 42,
             bottom: 30,
             left: 50
           };
